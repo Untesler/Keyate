@@ -1,0 +1,33 @@
+{
+  "name": "keyate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "nodemon server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Untesler/Keyate.git"
+  },
+  "author": "ENEmy",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Untesler/Keyate/issues"
+  },
+  "homepage": "https://github.com/Untesler/Keyate#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.2.3",
+    "mongoose": "^5.5.2"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "nodemon": "^1.18.11"
+  }
+}
