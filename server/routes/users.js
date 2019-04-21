@@ -3,7 +3,9 @@ const ROUTER = EXPRESS.Router();
 
 const USER_CONTROLLER = require('../controllers/UserController');
 
-ROUTER.get('/', USER_CONTROLLER.getIndexPage);
-ROUTER.get('/getall', USER_CONTROLLER.getData);
+ROUTER.get('/showall', USER_CONTROLLER.getData);
+ROUTER.post('/signin', USER_CONTROLLER.signIn);
+ROUTER.post('/register', USER_CONTROLLER.register);
+ROUTER.post('/decode', USER_CONTROLLER.getDecode);
 
 module.exports = ROUTER;
