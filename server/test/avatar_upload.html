@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>test upload file</title>
+    
+    <style type="text/css" media="all">
+      body {color: white;background-color: black}
+    </style>
+  </head>
+  <body>
+    <center>
+      <form action="http://localhost:3000/users/setProfile" method="post" enctype="multipart/form-data">
+       <input type="text" name="test" id="testId" value="" placeholder="input"> 
+       <br>
+       <input type="file" name="avatar" id="avatarID">
+       <br>
+       <input type="submit" name="Submit" id="SubmitID" value="Submit">
+      </form>
+    </center>
+  </body>
+</html>

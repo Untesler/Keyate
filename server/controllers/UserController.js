@@ -5,6 +5,7 @@ const MODEL = require('../models/UserModel');
 const COUNTER_MODEL = require('../models/CounterModel');
 const JWT = require('jsonwebtoken');
 const BCRYPT = require('bcrypt');
+const PATH = require('path');
 
 const getData = async (req, res) => {
   if(DBC.connection()){
@@ -79,6 +80,25 @@ const signIn = async (req, res) => {
   }
 };
 
+const setProfile = async (req, res) => {
+  if(req.files.avatar.truncated === false) 
+  {
+    if(Object.keys(req.files).length === 0) return res.sendStatus(400);
+    let uid = 1;
+    let fileData = req.files.avatar;
+    const extension = (fileData.name).substring(
+      (fileData.name).lastIndexOf('.'), 
+      (fileData.name).length);
+    const fileName = 'ava_' + uid + extension;
+    const newpath = PATH.join(__dirname, '../')+ "/assets/imgs/upload/avatars/"+fileName;
+
+    fileData.mv(newpath, (err) =>{
+      if(err) {return res.sendStatus(500);}
+      res.json({'status': 'File uploaded'});
+    });
+  }
+};
+
 const getDecode = (req, res) => {
   const decoded = JWT.verify(req.body.token, process.env.SECRET_KEY);
   res.send(decoded.email);
@@ -90,4 +110,8 @@ async function getNextSeq(modelName){
   return seq.val;
 }
 
-module.exports = {getData, register, signIn, getDecode};
+function authenication(token){
+  const decode = JWT.verify(token, process.env.SECRET_KEY);
+}
+
+module.exports = {getData, register, signIn, getDecode, setProfile};

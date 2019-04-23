@@ -2,15 +2,16 @@ const MONGOOSE = require('mongoose');
 
 const ILLUSTRATIONSCHEMA = MONGOOSE.Schema({
 
+  uid : {type: Number, required: true},
   name : {type: String, required: true},
   illustrator : {type: Number, required: true},
-  description : {type: String, default: ''},
+  description : {type: String, required: true, default: ''},
   tag : [ String ],
   category : [ String ],
-  release_date : {type: Date, default: Date.now},
-  views : {type: Number, default: 0},
-  populars : {type: Number, default: 0},
-  deleted : {type: Boolean, default: false},
+  release_date : {type: Date, required: true, default: Date.now},
+  views : {type: Number, required: true, default: 0},
+  populars : {type: Number, required: true, default: 0},
+  deleted : {type: Boolean, required: true, default: false},
   comments_box_id : {type: String, required: true}
 
 }, { collection : 'Illustrations'}

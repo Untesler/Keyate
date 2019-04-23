@@ -2,12 +2,18 @@ const MONGOOSE = require('mongoose');
 
 const COMMENTSCHEMA = MONGOOSE.Schema({
 
-  id : {type: String, required: true},
+  id : {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true
+  },
   comment : {
     commentator : {type: Number, required: true},
-    helpgul : {type: Number, default: 0},
+    helpful : {type: Number, required: true, default: 0},
     comment : {type: String, required: true},
-    deleted : {type: Boolean, default: false}
+    deleted : {type: Boolean, required: true, default: false},
+    date : {type: Date, required: true, default: Date.now()}
   } 
 
 }, { collection : 'Comments'}

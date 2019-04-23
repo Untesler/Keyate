@@ -1,5 +1,6 @@
 const EXPRESS = require('express');
 const BODYPARSER = require('body-parser');
+const FILEUPLOAD = require('express-fileupload');
 const CORS = require('cors');
 
 const SERVER = EXPRESS();
@@ -13,6 +14,16 @@ const USERS = require('./routes/users');
 SERVER.use(BODYPARSER.urlencoded({ extended: false }));
 SERVER.use(BODYPARSER.json());
 SERVER.use(CORS());
+SERVER.use(
+  FILEUPLOAD({
+    limits: { fileSize: 5 * 1024 * 1024 /* 5MB */ },
+    abortOnLimit: true,
+    limitHandler: (req, res, next) =>{
+      return res.json({'status': 'File size limit has been reached'});
+    },
+    useTempFiles : true,
+    tempFileDir : __dirname + '/assets/tmp/'
+}));
 
 SERVER.use('/users', USERS);
 
@@ -20,7 +31,7 @@ SERVER.use('/users', USERS);
 SERVER.get('*', (req, res) =>{
   res.setHeader('Content-Type', 'text/html');
   if(req.url === '/' || req.url === '/index' || req.url === '/index/'){
-    res.end('<b> This is Index </b>');
+    res.sendFile(__dirname + '/test/avatar_upload.html');
   }else{
     res.sendStatus(404);
   }
