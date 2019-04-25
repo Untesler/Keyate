@@ -1,5 +1,6 @@
 const MONGOOSE = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
+const timestamp = Date.now();
 
 const USERSCHEMA = MONGOOSE.Schema({
 
@@ -19,10 +20,12 @@ const USERSCHEMA = MONGOOSE.Schema({
     validate: [{validator: value => isEmail(value), msg: 'Invalid email.'}]
   },
   password : {type: String, required: true},
-  gender : {type: Number, required: false},
-  birthdate : {type: Date, required: false, default: Date.now()},
+  gender : {type: Number, required: false, default: -1},
+  birthdate : {type: Date, required: false, default: new Date(timestamp)},
   description : {type: String, required: false, default: 'Welcome to my profile.'},
-  follower : {type: Number, required: false, default: 0},
+  followers : [ Number ],
+  following : [ Number ],
+  favorites : [ Number ],
   avatar : {type: String, required: false, default: 'assets/imgs/upload/avatars/default.png'}
 
 }, { collection : 'Users'}

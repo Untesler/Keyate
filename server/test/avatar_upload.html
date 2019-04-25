@@ -12,10 +12,23 @@
   <body>
     <center>
       <form action="http://localhost:3000/users/setProfile" method="post" enctype="multipart/form-data">
-       <input type="text" name="test" id="testId" value="" placeholder="input"> 
+       <input type="text" name="penname" value="" placeholder="penname"> 
+       <br>
+       <input type="password" name="password" value="" placeholder="password">
+       <br>
+       <select name="gender" id="gender">
+         <option value="">Unknown</option>
+         <option value="0">Male</option>
+         <option value="1">Female</option>
+       </select>
+       <br>
+       <input type="date" name="birthdate" id="birthdate" value="">
+       <br>
+       <textarea name="description" id="" rows="9" cols="40" value="" placeholder="description"></textarea>
        <br>
        <input type="file" name="avatar" id="avatarID">
        <br>
+       <input type="hidden" name="token" id="token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjAsImVtYWlsIjoidGVzdHhAYWRtaW4uY29tIiwiaWF0IjoxNTU2MTYxMjEzLCJleHAiOjE1NTYyNDc2MTN9.OrEZD7lRQbVjkkNSYda2AG5eJQE2I4g3YbsE9ng7K6I">
        <input type="submit" name="Submit" id="SubmitID" value="Submit">
       </form>
     </center>

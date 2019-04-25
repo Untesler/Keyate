@@ -1,7 +1,7 @@
 const DB_CONFIG = require('../config/config_db');
 const MONGOOSE = require('mongoose');
 
-const connection = () => {
+const connect = () => {
   let state = MONGOOSE.connection.readyState;
   if(state === 0 || state === 3){
     if(MONGOOSE.connect(DB_CONFIG.db, {useNewUrlParser: true})){
@@ -21,4 +21,8 @@ const disconnect = () => {
   return true;
 }
 
-module.exports = {MONGOOSE, connection, disconnect};
+const state = () => {
+  return MONGOOSE.connection.readyState;
+}
+
+module.exports = {MONGOOSE, connect, disconnect, state};

@@ -1,3 +1,7 @@
 node_modules
 client
 server/config/config_db.js
+server/assets/imgs/upload/avatars/*
+server/assets/logs/*
+server/assets/tmp/*
+server/routes/assets
