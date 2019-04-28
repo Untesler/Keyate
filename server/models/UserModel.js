@@ -4,7 +4,7 @@ const timestamp = Date.now();
 
 const USERSCHEMA = MONGOOSE.Schema({
 
-  uid : {type: Number, required: true},
+  uid : {type: Number, required: true, unique: true},
   penname : {
     type: String, 
     unique: true, 
@@ -26,7 +26,7 @@ const USERSCHEMA = MONGOOSE.Schema({
   followers : [ Number ],
   following : [ Number ],
   favorites : [ Number ],
-  avatar : {type: String, required: false, default: 'assets/imgs/upload/avatars/default.png'}
+  avatar : {type: String, required: false, default: 'avatars/default.png'}
 
 }, { collection : 'Users'}
 

@@ -9,6 +9,7 @@ const PATH = require('path');
 const FS = require('fs');
 const LOG = require('../assets/srcs/Log');
 const AUTHENICATION = require('../controllers/Authenication');
+const to = require('await-to-js').default;
 const PRIVATE_KEY = FS.readFileSync(PATH.resolve(__dirname, '../config/private.key'));
 
 const getData = async (req, res) => {
@@ -21,6 +22,12 @@ const getData = async (req, res) => {
 };
 
 const register = async (req, res) => {
+  let err;
+
+  if(req.body.email === undefined || req.body.penname === undefined || req.body.password === undefined
+      || req.body.email === '' || req.body.penname === '' || req.body.password === '') 
+    return res.sendStatus(406);
+
   if(DBC.connect()){
     req.body.password = BCRYPT.hashSync(req.body.password, 10);
     const data = {
@@ -35,131 +42,199 @@ const register = async (req, res) => {
       avatar : undefined
     };
 
-    MODEL.create(data, (err) =>{
-      if(err){ 
-        let status = '';
-        if((err.message).search('keyate.Users index: email') !== -1) status = 'Duplicate email';
-        else if((err.message).search('keyate.Users index: penname') !== -1) status = 'Duplicate penname';
-        res.json({'status': status}) 
-        DBC.disconnect();
-      }
-      else {
-        res.json({status: 'Registered'});
-        DBC.disconnect();
-      }
-     });
-
+    [ err ] = await to(MODEL.create(data));
+    if(err){
+      let status = '';
+      if((err.message).search('keyate.Users index: email') !== -1) status = 'Duplicate email';
+      else if((err.message).search('keyate.Users index: penname') !== -1) status = 'Duplicate penname';
+      res.json({'status': status}) 
+    }else{
+      res.json({status: 'Registered'});
+    }
+    DBC.disconnect();
   }else{
     res.send("Can't make a connection.");
   }
 };
 
 const signIn = async (req, res) => {
+  let err, user;
+
+  if(req.body.email === undefined || req.body.password === undefined 
+      || req.body.email === '' || req.body.password === '') 
+    return res.sendStatus(406);
+
   if(DBC.connect()){
-    await MODEL.findOne(
-      {email: req.body.email},
-      (err, user) =>{
-        if(err) {res.send(err);}
-        else{
-          if(user){
-            if(BCRYPT.compareSync(req.body.password, user.password)){
-              const payload = {
-                uid: user.uid,
-                email: user.email
-              }
-              let token = JWT.sign(payload, PRIVATE_KEY,{
-                expiresIn: '24h'
-              })
-              res.send(token);
-            }
-            else res.json({ status: 'Password mismatch.'});
-          }
-          else res.json({ status: 'User does not exist.'});
+    [ err, user ] = await to(MODEL.findOne({email: req.body.email}));
+    if(err){
+      res.sendStatus(503);
+      LOG.write('Database', 'findOne failed because ('+err+')');
+    }
+    if(user){
+      if(BCRYPT.compareSync(req.body.password, user.password)){
+        const payload = {
+          uid: user.uid,
+          email: user.email
         }
-    });
+        const token = JWT.sign(payload, PRIVATE_KEY,{
+          expiresIn: '24h'
+        })
+        res.send(token);
+      }
+      else res.json({ status: 'Password mismatch.'});
+    }else{
+      res.json({ status: 'User does not exist'});
+    }
     DBC.disconnect();
   }else{
-    res.send("Can't make a connection.");
-    DBC.disconnect();
+    res.sendStatus(503);
   }
 };
 
 const setProfile = async (req, res) => {
-  const user = AUTHENICATION.authenicate(req.body.token);
+  const user = (req.token !== null) ? AUTHENICATION.authenicate(req.token) : null;
   let updateData = new Object();
+  let err, old_avatar;
 
   if(user){
 
-    if(req.body.penname !== '') updateData.penname = req.body.penname;
-    if(req.body.password !== '') updateData.password = BCRYPT.hashSync(req.body.password, 10);
-    if(req.body.gender !== '') updateData.gender = req.body.gender;
-    if(req.body.birthdate !== '') updateData.birthdate = new Date(req.body.birthdate);
-    if(req.body.description !== '') updateData.description = req.body.description;
+    if(req.body.penname !== '' && req.body.penname !== undefined) updateData.penname = req.body.penname;
+    if(req.body.password !== '' && req.body.password !== undefined) updateData.password = BCRYPT.hashSync(req.body.password, 10);
+    if(req.body.gender !== '' && req.body.gender !== undefined) updateData.gender = req.body.gender;
+    if(req.body.birthdate !== '' && req.body.birthdate !== undefined) updateData.birthdate = new Date(req.body.birthdate);
+    if(req.body.description !== '' && req.body.description !== undefined) updateData.description = req.body.description;
 
-    if(req.files.avatar.truncated === false) 
+    if(req.files !== undefined )
     {
-      if(Object.keys(req.files).length !== 0){
-        if(req.files.avatar.size !== 0){
+      if(req.files.avatar.truncated === false)
+      {
+        if(req.files.avatar.size > 0){
           let fileData = req.files.avatar;
           const extension = (fileData.name).substring(
             (fileData.name).lastIndexOf('.'), 
             (fileData.name).length);
           const fileName = 'ava_' + user.uid + extension;
           const newpath = PATH.join(__dirname, '../')+ "/assets/imgs/upload/avatars/"+fileName;
-          const old_avatar = await MODEL.findOne({uid: user.uid}, 'avatar', (err, result)=>{
-            if(err){
-              LOG.write('Database', 'findOne failed because ('+err+').');
-              res.sendStatus(503);
-            }else return result;
-          });
-
-          if(old_avatar.avatar != 'assets/imgs/upload/avatars/default.png'){
-            await FS.unlink(PATH.resolve(__dirname, '../'+old_avatar.avatar), (err) =>{
+          [ err, old_avatar ] = await to(MODEL.findOne({uid: user.uid}, 'avatar'));
+          if(err){
+            LOG.write('Database', 'findOne failed because ('+err+').');
+            return res.sendStatus(503);
+          }
+          if(old_avatar === null) return res.sendStatus(404);
+          if(old_avatar.avatar != 'avatars/default.png'){
+            FS.unlink(PATH.resolve(__dirname, '../assets/imgs/upload/'+old_avatar.avatar), (err) =>{
               if(err){
                 LOG.write('Error', 'Failed to delete old avatar ('+err+').');
-                res.sendStatus(500);
+                return res.sendStatus(500);
               }
             });
           }
 
-          fileData.mv(newpath, (err) =>{
-            if(err) {
-              LOG.write('Error', 'Failed to create avatar image ('+err+').');
-              FS.unlink(req.files.avatar.tempFilePath, (err) => {
-                if(err) LOG.write('Error', 'Failed to delete tmp file ('+err+').');
-              });
-              return res.sendStatus(500);
-            }
-          });
-          updateData.avatar = "assets/imgs/upload/avatars/" + fileName;
+          [ err ] = await to(fileData.mv(newpath));
+          if(err){
+            LOG.write('Error', 'Failed to create avatar image ('+err+').');
+            FS.unlink(req.files.avatar.tempFilePath, (err) => {
+              if(err) LOG.write('Error', 'Failed to delete tmp file ('+err+').');
+            });
+            return res.sendStatus(500);
+          }
+          updateData.avatar = "avatars/" + fileName;
         }else{
+          LOG.write('Error', 'Failed to upload avatar becaause size of req file <= 0');
           FS.unlink(req.files.avatar.tempFilePath, (err) => {
             if(err) LOG.write('Error', 'Failed to delete tmp file ('+err+').');
           });
         }
-      }else res.sendStatus(400);
+      }else{
+        LOG.write('Error', 'Failed to upload data because file size limit has been reached.');
+        return res.sendStatus(406);
+      }
     }
 
-    await MODEL.updateOne({uid: user.uid}, updateData, (err) =>{
+    if(DBC.connect()){
+      [ err ] = await to(MODEL.updateOne({uid: user.uid}, updateData));
       if(err){
         LOG.write('Database', 'updateOne failed beacause ('+err+').');
-        res.sendStatus(503);
+        return res.sendStatus(503);
       }else{
         LOG.write('Database', 'Uid['+user.uid+'] Update profile success.')
       }
-    });
-    res.sendStatus(201);
+      return res.sendStatus(201);
+    }else{
+      return res.sendStatus(503);
+    }
   }else{
-    FS.unlink(req.files.avatar.tempFilePath, (err) => {
-      if(err) LOG.write('Error', 'Failed to delete tmp file ('+err+').');
-    });
-    res.sendStatus(401);
+    if(req.files !== undefined){
+      FS.unlink(req.files.avatar.tempFilePath, (err) => {
+        if(err) LOG.write('Error', 'Failed to delete tmp file ('+err+').');
+      });
+    }
+    return res.sendStatus(401);
   }
 };
 
 const getDecode = (req, res) => {
   const decoded = JWT.verify(req.body.token, PRIVATE_KEY);
   res.send(decoded.email);
+}
+
+const findUserUid = async (req, res) =>{
+  let err, old_avatar;
+
+  DBC.connect();
+  [ err, old_avatar ] = await to(MODEL.findOne({uid: '1'}, 'avatar'));
+  if(err){
+    res.json({"error": err});
+  }else{
+    if(old_avatar === null) return res.json({"uid": "not found"});
+    res.json({"uid": old_avatar});
+  }
+}
+
+const getFavorites = async (req, res) =>{
+  let err, favs;
+  const user = (req.token !== null) ? AUTHENICATION.authenicate(req.token) : null;
+
+  if(user){
+    if(DBC.connect()){
+      [ err, favs ] = await to(MODEL.findOne({uid: user.uid}, 'favorites'));
+      if(err){
+        LOG.write('Database', 'findOne failed because('+err+')');
+        return res.sendStatus(503);
+      }else{
+        DBC.disconnect();
+        return res.json({'Total': (favs.favorites).length, 'favorites': favs.favorites});
+      }
+    }else{
+      return res.sendStatus(503);
+    }
+  }else {
+    LOG.write('Authenicate', 'Failed to get favorites because token not found.');
+    return res.sendStatus(401);
+  }
+}
+
+const getFollowers = async (req, res) =>{
+  let err, fol;
+  const user = (req.token !== null) ? AUTHENICATION.authenicate(req.token) : null;
+
+  if(user){
+    if(DBC.connect()){
+      [ err, fol ] = await to(MODEL.findOne({uid: user.uid}, 'followers'));
+      if(err){
+        LOG.write('Database', 'findOne failed because('+err+')');
+        return res.sendStatus(503);
+      }else{
+        DBC.disconnect();
+        return res.json({'Total': (fol.followers).length, 'followers': fol.followers});
+      }
+    }else{
+      return res.sendStatus(503);
+    }
+  }else {
+    LOG.write('Authenicate', 'Failed to get followers because token not found.');
+    return res.sendStatus(401);
+  }
 }
 
 async function getNextSeq(modelName){
@@ -169,4 +244,4 @@ async function getNextSeq(modelName){
 }
 
 
-module.exports = {getData, register, signIn, getDecode, setProfile};
+module.exports = {getData, register, signIn, getDecode, setProfile, findUserUid, getFavorites, getFollowers};
