@@ -3,6 +3,8 @@ const ROUTER = EXPRESS.Router();
 
 const ILLUST_CONTROLLER = require('../controllers/IllustController');
 
+// List all work of user
+ROUTER.get('/', ILLUST_CONTROLLER.listWork);
 //Submit new work
 ROUTER.post('/work', ILLUST_CONTROLLER.submitWork);
 //Set deleted state for this work
