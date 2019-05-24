@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <style type="text/css" media="all">
+      body {color: white;background-color: black}
+    </style>
+    <title>ShowWork</title>
+</head>
+<body>
+   <img src="" alt="" id="img1" defer> <br>
+   <span id="name1" defer>Illustration name : </span> <br>
+   <span id="desc1" defer>Description : </span> <br>
+
+   <span id="status" defer>Status : </span>
+
+   <script>
+       $(document).ready(() => {
+           const getURL = "http://localhost:3000/illusts/"
+           const getValue = ( (window.location.pathname).split('/') )[2];
+           let runOnce = true;
+           let illustData;
+           if (runOnce){
+            $.get(getURL+getValue, (data) => {
+                illustData = data
+            }, "json")
+            .done(() => {
+                if (illustData.length !== 0){
+                    $('#img1').attr('src', "http://localhost:3000/"+illustData[0].path);
+                    $('#name1').append(illustData[0].name);
+                    $('#desc1').append(illustData[0].description);
+                    $('#status').remove();
+                }else{
+                    $('#img1').remove();
+                    $('#ill1').remove();
+                    $('#desc1').remove();
+                    $('#status').append("Not found.");
+                }
+            })
+            .fail((data, txtStatus, xhr) => {
+                console.log(data.status);
+                $('#img1').remove();
+                $('#ill1').remove();
+                $('#desc1').remove();
+                $('#status').append("Error occurs.");
+            });
+            $.ajax({
+                url: `${getURL}/view/${getValue}`,
+                method: 'PUT',
+                success: () => {
+                    runOnce = false;
+                },
+                error: (data, txtStatus, xhr) => {
+                    console.log(data.status);
+                    //window.location.href = `http://locahost:3000/showWork/${getValue}`;
+                }
+            });
+           }
+       })
+   </script>
+</body>
+</html>

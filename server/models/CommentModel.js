@@ -1,4 +1,5 @@
 const MONGOOSE = require('mongoose');
+const timestamp = Date.now();
 
 const COMMENTSCHEMA = MONGOOSE.Schema({
 
@@ -8,13 +9,13 @@ const COMMENTSCHEMA = MONGOOSE.Schema({
     trim    : true,
     unique  : true
   },
-  comment : {
-    commentator: {type: Number, required: true},
+  comments : {
+    commentator: {type: Number, required: true, default: 0},
     helpful    : {type: Number, required: true, default: 0},
-    comment    : {type: String, required: true},
+    comment    : {type: String, required: true, default: "empty"},
     deleted    : {type: Boolean, required: true, default: false},
-    date       : {type: Date, required: true, default: new Date(Date.now())}
-  } 
+    date       : {type: Date, required: true, default: new Date(timestamp)}
+  }
 
 }, { collection : 'Comments'}
 

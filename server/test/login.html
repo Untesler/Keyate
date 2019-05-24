@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <style type="text/css" media="all">
+      body {color: white;background-color: black}
+    </style>
+    <title>Login</title>
+</head>
+<body>
+    <center>
+        <div>
+            <input type="text" id="email" name="email" placeholder="Email" value=""><br>
+            <input type="password" id="password" name="password" placeholder="Password" value=""><br>
+            <input type="button" id="submit" value="Sign-In">
+        </div>
+    </center>
+    <script>
+        $(document).ready(() => {
+           const token = localStorage.getItem("token");
+           if(token){
+                $.ajaxSetup({
+                    headers: {
+                        'Authorization': "Bearer " + token
+                    }
+                });
+               let flag = false;
+                $.post("http://localhost:3000/users/verify", (data) => {
+                    flag = data;
+                })
+                .done(() => {
+                    if(flag)
+                        window.location.href = "http://localhost:3000/submitWork"
+                    else{
+                        localStorage.removeItem("token");
+                    }
+                })
+                .fail((data, txtStatus, xhr) => {
+                    console.log(data.status);
+                    localStorage.removeItem("token");
+                    window.location.href = "http://localhost:3000/login"
+                });
+           }
+            $("#submit").click(() => {
+                const email = $("#email").val();
+                const pass = $("#password").val();
+                let token;
+                if (email!== "" || pass !== "" || email !== undefined || pass !== undefined){
+                    $.post("http://localhost:3000/users/signin",
+                    { 
+                      email: email,
+                      password: pass
+                    }, (data) => {
+                        token = data;
+                    })
+                    .done(() =>{
+                        if (token.status === "User does not exist"){
+                            window.location.href = "http://localhost:3000/login?error=mismatch";
+                        }else{
+                            localStorage.setItem("token", token);
+                            window.location.href = "http://localhost:3000/submitWork";
+                        }
+                    })
+                    .fail((data, txtStatus, xhr) => {
+                        console.log(data.status);
+                        window.location.href = "http://localhost:3000/login";
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

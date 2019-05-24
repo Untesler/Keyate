@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <style type="text/css" media="all">
+      body {color: white;background-color: black}
+    </style>
+    <title>SubmitWork</title>
+</head>
+<body>
+   <span id="token_show" defer>Your token is : </span> <br>
+   <form action="" method="post" enctype="multipart/form-data" name="submitWork" id="submitWork">
+        Upload work : <input type="file" name="work" id="work"><br>
+        Name of work : <input type="text" name="name" id="name", placeholder="Illustration name"><br>
+        Tag : <input type="text" name="tag" id="tag", placeholder="tag1,tag2,tag3,.."><br>
+        Category : <input type="text" name="category" id="category", placeholder="category1,category2,category3,.."><br>
+        Description : <input type="text" name="description" id="description", placeholder="Description"><br>
+        <input type="submit" value="Submit Illust" id="submit"><br>
+   </form>
+   <input type="button" value="Sign-out" id="signout">
+   <script>
+       $(document).ready( () => {
+           const token = localStorage.getItem("token");
+           if(token){
+                $.ajaxSetup({
+                    headers: {
+                        'Authorization': "Bearer " + token
+                    },
+                    processData: false,
+                    contentType: false,
+                    cache: false
+                });
+               let flag = false;
+                $.post("http://localhost:3000/users/verify", (data) => {
+                    flag = data;
+                })
+                .done(() => {
+                    if(flag)
+                        $("#token_show").append(token);
+                    else{
+                        localStorage.removeItem("token");
+                        window.location.href = "http://localhost:3000/login"
+                    }
+                })
+                .fail((data, txtStatus, xhr) => {
+                    console.log(data.status);
+                    localStorage.removeItem("token");
+                    window.location.href = "http://localhost:3000/login"
+                });
+           }else{
+               window.location.href = "http://localhost:3000/login";
+           }
+           $("#signout").click(() => {
+               localStorage.removeItem("token");
+               window.location.href = "http://localhost:3000/login";
+           });
+           
+           $("#submitWork").on("submit", (e) => {
+               e.preventDefault(); // deactivate default form event
+               const wName = $("#name").val(),
+                     wFile = $("#work").get(0).files[0],
+                     wTag = $("#tag").val(),
+                     wCategory = $("#category").val(),
+                     wDescription = $("#description").val();
+                
+                if (wName === "" || wName === undefined || wFile === undefined){
+                    window.location.href = "http://locahost:3000/submitWork?error=InvalidInput";
+                } else {
+                    fd = new FormData();
+                    fd.append("name", wName);
+                    fd.append("work", wFile);
+                    if(wTag !== "" || wTag !== undefined) fd.append("tag", wTag);
+                    if(wCategory !== "" || wCategory !== undefined) fd.append("category", wCategory);
+                    if(wDescription !== "" || wDescription !== undefined) fd.append("description", wDescription);
+                    $.post("http://localhost:3000/illusts/user", fd)
+                    .done(() =>{
+                        window.location.href = "http://localhost:3000/submitWork?status=success";
+                    })
+                    .fail((data, txtStatus, xhr) => {
+                        console.log(data.status);
+                        window.location.href = "http://localhost:3000/submitWork?status=fail";
+                    });
+                }
+           })
+       });
+   </script>
+</body>
+</html>

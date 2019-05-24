@@ -12,8 +12,8 @@ const USERS   = require("./routes/users");
 const ILLUSTS = require('./routes/illust');
 
 // Middleware
-SERVER.use(BODYPARSER.urlencoded({ extended: false }));
-SERVER.use(BODYPARSER.json());
+SERVER.use(BODYPARSER.urlencoded({ limit: '10mb', extended: true }));
+SERVER.use(BODYPARSER.json({ limit: '10mb', extended: true }));
 SERVER.use(BEARERTOKEN());
 SERVER.use(CORS());
 SERVER.use(
@@ -36,16 +36,29 @@ SERVER.use(
   EXPRESS.static(__dirname + "/assets/imgs/upload/avatars")
 );
 SERVER.use(
-  "/illusts",
+  "/upload/illusts",
   EXPRESS.static(__dirname + "/assets/imgs/upload/illusts")
 );
+
+// Redundant path, used for unit test only
+SERVER.get("/showWork/:id", (req, res) => {
+  res.sendFile(__dirname + "/test/showWork.html");
+});
+
+SERVER.get("/submitWork", (req, res) => {
+  res.sendFile(__dirname + "/test/submitWork.html");
+});
+
+SERVER.get("/login", (req, res) => {
+  res.sendFile(__dirname + "/test/login.html");
+});
 
 //if have no any route to handle this req or req.url are index or default
 SERVER.get("*", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   if (req.url === "/" || req.url === "/index" || req.url === "/index/") {
     res.sendFile(__dirname + "/test/avatar_upload.html");
-  } else {
+  }else {
     res.sendStatus(404);
   }
 });

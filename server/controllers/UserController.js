@@ -290,6 +290,14 @@ const getFollowers = async (req, res) => {
   }
 };
 
+const verify = async (req, res) =>{
+  const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
+  if(user)
+    res.send(true);
+  else
+    res.send(false);
+}
+
 module.exports = {
   getData,
   register,
@@ -298,5 +306,6 @@ module.exports = {
   setProfile,
   findUserUid,
   getFavorites,
-  getFollowers
+  getFollowers,
+  verify
 };
