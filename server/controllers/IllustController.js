@@ -235,7 +235,7 @@ const getWork = async (req, res) => {
   /* return the collected data from database as a response */
   let err, workData;
   if (DBC.connect()) {
-    [err, workData] = await to(MODEL.find({ uid: req.params.illustID }));
+    [err, workData] = await to(MODEL.findOne({ uid: req.params.illustID }));
     DBC.disconnect();
     if (err) {
       LOG.write("Database", `find failed because (${err}).`);
@@ -258,12 +258,12 @@ const addView = async (req, res) => {
         { uid: req.params.illustID },
         { views: total.views + 1 }
       );
-      return res.status(200);
+      DBC.disconnect()
     } catch (e) {
       LOG.write("Database", `findOne/updateOne failed because (${e}).`);
-      DBC.disconnect();
       return res.sendStatus(503);
     }
+    return res.status(201);
   } else {
     LOG.write(
       "Authenicate",

@@ -9,13 +9,13 @@ const COMMENTSCHEMA = MONGOOSE.Schema({
     trim    : true,
     unique  : true
   },
-  comments : {
+  comments : [{
     commentator: {type: Number, required: true, default: 0},
     helpful    : {type: Number, required: true, default: 0},
     comment    : {type: String, required: true, default: "empty"},
     deleted    : {type: Boolean, required: true, default: false},
     date       : {type: Date, required: true, default: new Date(timestamp)}
-  }
+  }]
 
 }, { collection : 'Comments'}
 

@@ -15,7 +15,7 @@ ROUTER.put('/setProfile', USER_CONTROLLER.setProfile);
 ROUTER.get('/favorites', USER_CONTROLLER.getFavorites);
 // get all followers of user
 ROUTER.get('/followers', USER_CONTROLLER.getFollowers);
-// verify token
+// verify token, return user data as json when has no mistake if not will return false
 ROUTER.post('/verify', USER_CONTROLLER.verify);
 
 //test route

@@ -33,7 +33,7 @@
                 })
                 .done(() => {
                     if(flag)
-                        window.location.href = "http://localhost:3000/submitWork"
+                        window.location.href = "http://localhost:3000/test/submitWork"
                     else{
                         localStorage.removeItem("token");
                     }
@@ -41,7 +41,7 @@
                 .fail((data, txtStatus, xhr) => {
                     console.log(data.status);
                     localStorage.removeItem("token");
-                    window.location.href = "http://localhost:3000/login"
+                    window.location.href = "http://localhost:3000/test/login"
                 });
            }
             $("#submit").click(() => {
@@ -58,15 +58,15 @@
                     })
                     .done(() =>{
                         if (token.status === "User does not exist"){
-                            window.location.href = "http://localhost:3000/login?error=mismatch";
+                            window.location.href = "http://localhost:3000/test/login?error=mismatch";
                         }else{
                             localStorage.setItem("token", token);
-                            window.location.href = "http://localhost:3000/submitWork";
+                            window.location.href = "http://localhost:3000/test/submitWork";
                         }
                     })
                     .fail((data, txtStatus, xhr) => {
                         console.log(data.status);
-                        window.location.href = "http://localhost:3000/login";
+                        window.location.href = "http://localhost:3000/test/login";
                     });
                 }
             });

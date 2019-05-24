@@ -11,16 +11,22 @@
     <title>SubmitWork</title>
 </head>
 <body>
-   <span id="token_show" defer>Your token is : </span> <br>
-   <form action="" method="post" enctype="multipart/form-data" name="submitWork" id="submitWork">
-        Upload work : <input type="file" name="work" id="work"><br>
-        Name of work : <input type="text" name="name" id="name", placeholder="Illustration name"><br>
-        Tag : <input type="text" name="tag" id="tag", placeholder="tag1,tag2,tag3,.."><br>
-        Category : <input type="text" name="category" id="category", placeholder="category1,category2,category3,.."><br>
-        Description : <input type="text" name="description" id="description", placeholder="Description"><br>
-        <input type="submit" value="Submit Illust" id="submit"><br>
-   </form>
-   <input type="button" value="Sign-out" id="signout">
+   <center>
+            <p>
+                <img src="" alt="avatar" id="avatar" defer> <br>
+                <span id="penname" defer>Welcome back </span> <br>
+                <span id="token_show" defer>Your token is : </span> <br>
+            </p>
+        <form action="" method="post" enctype="multipart/form-data" name="submitWork" id="submitWork">
+                Upload work : <input type="file" name="work" id="work"><br>
+                Name of work : <input type="text" name="name" id="name", placeholder="Illustration name"><br>
+                Tag : <input type="text" name="tag" id="tag", placeholder="tag1,tag2,tag3,.."><br>
+                Category : <input type="text" name="category" id="category", placeholder="category1,category2,category3,.."><br>
+                Description : <input type="text" name="description" id="description", placeholder="Description"><br>
+                <input type="submit" value="Submit Illust" id="submit"><br>
+        </form>
+        <p><input type="button" value="Sign-out" id="signout"></p>
+    </center>
    <script>
        $(document).ready( () => {
            const token = localStorage.getItem("token");
@@ -33,29 +39,33 @@
                     contentType: false,
                     cache: false
                 });
-               let flag = false;
+               let userData = false;
                 $.post("http://localhost:3000/users/verify", (data) => {
-                    flag = data;
+                    userData = data;
                 })
                 .done(() => {
-                    if(flag)
+                    if(userData){
+                        console.log(JSON.stringify(userData));
                         $("#token_show").append(token);
+                        $("#avatar").attr("src", "http://localhost:3000/" + userData.avatar);
+                        $("#penname").append(userData.penname);
+                    }
                     else{
                         localStorage.removeItem("token");
-                        window.location.href = "http://localhost:3000/login"
+                        window.location.href = "http://localhost:3000/test/login"
                     }
                 })
                 .fail((data, txtStatus, xhr) => {
                     console.log(data.status);
                     localStorage.removeItem("token");
-                    window.location.href = "http://localhost:3000/login"
+                    window.location.href = "http://localhost:3000/test/login"
                 });
            }else{
-               window.location.href = "http://localhost:3000/login";
+               window.location.href = "http://localhost:3000/test/login";
            }
            $("#signout").click(() => {
                localStorage.removeItem("token");
-               window.location.href = "http://localhost:3000/login";
+               window.location.href = "http://localhost:3000/test/login";
            });
            
            $("#submitWork").on("submit", (e) => {
@@ -67,7 +77,7 @@
                      wDescription = $("#description").val();
                 
                 if (wName === "" || wName === undefined || wFile === undefined){
-                    window.location.href = "http://locahost:3000/submitWork?error=InvalidInput";
+                    window.location.href = "http://locahost:3000/test/submitWork?error=InvalidInput";
                 } else {
                     fd = new FormData();
                     fd.append("name", wName);
@@ -77,11 +87,11 @@
                     if(wDescription !== "" || wDescription !== undefined) fd.append("description", wDescription);
                     $.post("http://localhost:3000/illusts/user", fd)
                     .done(() =>{
-                        window.location.href = "http://localhost:3000/submitWork?status=success";
+                        window.location.href = "http://localhost:3000/test/submitWork?status=success";
                     })
                     .fail((data, txtStatus, xhr) => {
                         console.log(data.status);
-                        window.location.href = "http://localhost:3000/submitWork?status=fail";
+                        window.location.href = "http://localhost:3000/test/submitWork?status=fail";
                     });
                 }
            })

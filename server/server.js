@@ -10,6 +10,8 @@ const PORT   = process.env.PORT || 3000;
 // Routes import
 const USERS   = require("./routes/users");
 const ILLUSTS = require('./routes/illust');
+const COMMENTS = require("./routes/comments");
+const TEST = require("./routes/test");
 
 // Middleware
 SERVER.use(BODYPARSER.urlencoded({ limit: '10mb', extended: true }));
@@ -31,6 +33,7 @@ SERVER.use(
 // Routes
 SERVER.use("/users", USERS);
 SERVER.use("/illusts", ILLUSTS);
+SERVER.use("/comments", COMMENTS);
 SERVER.use(
   "/avatars",
   EXPRESS.static(__dirname + "/assets/imgs/upload/avatars")
@@ -41,17 +44,7 @@ SERVER.use(
 );
 
 // Redundant path, used for unit test only
-SERVER.get("/showWork/:id", (req, res) => {
-  res.sendFile(__dirname + "/test/showWork.html");
-});
-
-SERVER.get("/submitWork", (req, res) => {
-  res.sendFile(__dirname + "/test/submitWork.html");
-});
-
-SERVER.get("/login", (req, res) => {
-  res.sendFile(__dirname + "/test/login.html");
-});
+SERVER.use("/test", TEST);
 
 //if have no any route to handle this req or req.url are index or default
 SERVER.get("*", (req, res) => {

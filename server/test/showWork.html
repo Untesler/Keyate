@@ -11,16 +11,19 @@
     <title>ShowWork</title>
 </head>
 <body>
-   <img src="" alt="" id="img1" defer> <br>
-   <span id="name1" defer>Illustration name : </span> <br>
-   <span id="desc1" defer>Description : </span> <br>
-
+    <center>
+        <img src="" alt="" id="img1" width="50%" height="50%" defer> <br>
+        <br><hr><br>
+        <span id="name1" defer>Illustration name : </span> <br>
+        <span id="desc1" defer>Description : </span> <br>
+        <span id="view1" defer>Viewer : </span> <br>
+    </center>
    <span id="status" defer>Status : </span>
 
    <script>
        $(document).ready(() => {
            const getURL = "http://localhost:3000/illusts/"
-           const getValue = ( (window.location.pathname).split('/') )[2];
+           const getValue = ( (window.location.pathname).split('/') )[3];
            let runOnce = true;
            let illustData;
            if (runOnce){
@@ -28,15 +31,17 @@
                 illustData = data
             }, "json")
             .done(() => {
-                if (illustData.length !== 0){
-                    $('#img1').attr('src', "http://localhost:3000/"+illustData[0].path);
-                    $('#name1').append(illustData[0].name);
-                    $('#desc1').append(illustData[0].description);
+                if (illustData.path !== undefined){
+                    $('#img1').attr('src', "http://localhost:3000/"+illustData.path);
+                    $('#name1').append(illustData.name);
+                    $('#desc1').append(illustData.description);
+                    $('#view1').append(illustData.views);
                     $('#status').remove();
                 }else{
                     $('#img1').remove();
                     $('#ill1').remove();
                     $('#desc1').remove();
+                    $('#view1').remove();
                     $('#status').append("Not found.");
                 }
             })
@@ -45,6 +50,7 @@
                 $('#img1').remove();
                 $('#ill1').remove();
                 $('#desc1').remove();
+                $('#view1').remove();
                 $('#status').append("Error occurs.");
             });
             $.ajax({

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <style type="text/css" media="all">
+      body {color: white;background-color: black}
+    </style>
+    <title>Comment Box</title>
+</head>
+<body>
+    <div id="commentList">
+        <!-- <span id="comment1"></span><br> -->
+    </div>
+
+    <br><br><hr>
+
+    <div id="doComment" style="align-content: center;">
+        <span id="controller">
+            <input type="text" id="txtInput" value="">
+            <input type="button" value="Send" id="send">
+        </span>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+           const token = localStorage.getItem("token");
+           let userData = false;
+           if(token){
+                $.ajaxSetup({
+                    headers: {
+                        'Authorization': "Bearer " + token
+                    },
+                    processData: false,
+                    contentType: false,
+                    cache: false
+                });
+                $.post("http://localhost:3000/users/verify", (data) => {
+                    userData = data;
+                })
+                .done(() => {
+                    if(userData){
+                        console.log(JSON.stringify(userData));
+                    }
+                    else{
+                        localStorage.removeItem("token");
+                        window.location.href = "http://localhost:3000/test/login"
+                    }
+                })
+                .fail((data, txtStatus, xhr) => {
+                    console.log(data.status);
+                    localStorage.removeItem("token");
+                    window.location.href = "http://localhost:3000/test/login"
+                });
+           }else{
+               window.location.href = "http://localhost:3000/test/login";
+           }
+
+           $("#send").click(() => {
+               const txt = $("#txtInput").val();
+               if (txt){
+                    const comment = $("<span style='color: white;'></span><br>").text(`${userData.penname} : ${txt}`);
+                    $("#commentList").append(comment);
+                    $("#txtInput").val("");
+               }
+           })
+        })
+    </script>
+</body>
+</html>

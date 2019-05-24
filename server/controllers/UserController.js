@@ -292,8 +292,11 @@ const getFollowers = async (req, res) => {
 
 const verify = async (req, res) =>{
   const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
-  if(user)
-    res.send(true);
+  let err, userData;
+  if(user){
+    [err, userData] = await to(MODEL.findOne({ uid: user.uid }, "uid email penname gender birthdate description avatar"));
+    res.json(userData);
+  }
   else
     res.send(false);
 }
