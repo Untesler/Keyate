@@ -12,6 +12,7 @@ const to             = require("await-to-js").default;
 const AUTO_INCREMENT = require("../assets/srcs/AutoIncrement");
 
 const submitWork = async (req, res) => {
+  const auto = require("../assets/srcs/autoCategorize");
   let err;
   const user     = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
   const work_uid = await AUTO_INCREMENT.getNextSeq("Illusts"); // generate new uid
@@ -79,6 +80,16 @@ const submitWork = async (req, res) => {
             return res.sendStatus(500);
           }
           uploadData.path = "upload/illusts/" + fileName;
+          //auto categorize when has no category defined
+          if (uploadData.category.length === 0){
+            const [category] = await auto.categorize(storePath);
+            // if the illustration is tag able and has no tag is defined
+            if (category.predictedCategory === "Background" && uploadData.tag.length === 0) {
+              let tag = await auto.tag(storePath, 5);
+              uploadData.tag = tag.split(",");
+            }
+            uploadData.category = [category.predictedCategory];
+          }
         } else {
           // if the file size if less than 0
           LOG.write(

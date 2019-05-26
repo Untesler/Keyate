@@ -3,15 +3,18 @@ const BODYPARSER  = require("body-parser");
 const FILEUPLOAD  = require("express-fileupload");
 const CORS        = require("cors");
 const BEARERTOKEN = require("express-bearer-token");
+const PATH        = require("path");
 
 const SERVER = EXPRESS();
 const PORT   = process.env.PORT || 3000;
+//Google application credential use for access to Vision API for use auto categorize and taging feature.
+process.env.GOOGLE_APPLICATION_CREDENTIALS = PATH.join(__dirname, "config/google_app_credential.json");
 
 // Routes import
-const USERS   = require("./routes/users");
-const ILLUSTS = require('./routes/illust');
+const USERS    = require("./routes/users");
+const ILLUSTS  = require('./routes/illust');
 const COMMENTS = require("./routes/comments");
-const TEST = require("./routes/test");
+const TEST     = require("./routes/test");
 
 // Middleware
 SERVER.use(BODYPARSER.urlencoded({ limit: '10mb', extended: true }));
