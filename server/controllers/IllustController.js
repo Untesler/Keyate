@@ -10,6 +10,7 @@ const LOG            = require("../assets/srcs/Log");
 const AUTHENICATION  = require("../controllers/Authenication");
 const to             = require("await-to-js").default;
 const AUTO_INCREMENT = require("../assets/srcs/AutoIncrement");
+const IlRank         = require("../assets/srcs/IlRank");
 
 const submitWork = async (req, res) => {
   const auto = require("../assets/srcs/autoCategorize");
@@ -261,13 +262,28 @@ const getWork = async (req, res) => {
 
 const addView = async (req, res) => {
   /* increase the value of view filed with 1 */
-  let total;
+  let illustData, illustratorData;
+  let user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
+  let viewer = "";
+  let popularity;
+  const IlRankObj = new IlRank();
+
   if (DBC.connect()) {
     try {
-      total = await MODEL.findOne({ uid: req.params.illustID }, "views");
+      illustData = await MODEL.findOne({ uid: req.params.illustID }, "views popularity illustrator release_date");
+      if(user) viewer = user.uid === illustData.illustrator ? "owner" : "user";
+      else viewer = "guest";
+      popularity = IlRankObj.popularity(viewer, "view", illustData.release_date.getTime());
       await MODEL.updateOne(
         { uid: req.params.illustID },
-        { views: total.views + 1 }
+        { views: illustData.views + 1,
+          popularity: illustData.popularity + popularity
+        }
+      );
+      illustratorData = await USER_MODEL.findOne({ uid: illustData.illustrator }, "rank");
+      await USER_MODEL.updateOne(
+        { uid: illustData.illustrator },
+        { rank: illustratorData.rank + popularity }
       );
       DBC.disconnect()
     } catch (e) {
@@ -286,15 +302,27 @@ const addView = async (req, res) => {
 
 const addPopular = async (req, res) => {
   /* increase the value of popular filed with 1 and push the work_uid to favorite list of user */
-  let total;
+  let illustData, illustratorData;
   const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
+  let viewer = "";
+  let popularity;
+  const IlRankObj = new IlRank();
   if (user) {
     if (DBC.connect()) {
       try {
-        total = await MODEL.findOne({ uid: req.params.illustID }, "populars");
+        illustData = await MODEL.findOne({ uid: req.params.illustID }, "popularity illustrator release_date");
+        if(illustData === null) return res.sendStatus(404);
+        if(user) viewer = user.uid === illustData.illustrator ? "owner" : "user";
+        else viewer = "guest";
+        popularity = IlRankObj.popularity(viewer, "favorite", illustData.release_date.getTime());
         await MODEL.updateOne(
           { uid: req.params.illustID },
-          { populars: total.populars + 1 }
+          { popularity: illustData.popularity + popularity }
+        );
+        illustratorData = await USER_MODEL.findOne({ uid: illustData.illustrator }, "rank");
+        await USER_MODEL.updateOne(
+          { uid: illustData.illustrator },
+          { rank: illustratorData.rank + popularity }
         );
         await USER_MODEL.updateOne(
           { uid: user.uid },

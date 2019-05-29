@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
     <title>test upload file</title>
     
     <style type="text/css" media="all">
@@ -11,27 +12,100 @@
   </head>
   <body>
     <center>
-      <img src="http://localhost:3000/avatars/ava_0.png" alt="">
-      <form action="http://localhost:3000/users/setProfile" method="post" enctype="multipart/form-data">
-       <input type="text" name="penname" value="" placeholder="penname"> 
+      <img id="currAva" src="" alt="" defer>
+       <input type="text" id="penname" name="penname" value="" placeholder="penname" defer> 
        <br>
-       <input type="password" name="password" value="" placeholder="password">
+       <input type="password" id="password" name="password" value="" placeholder="password" defer>
        <br>
-       <select name="gender" id="gender">
+       <select name="gender" id="gender" defer>
          <option value="">Unknown</option>
          <option value="0">Male</option>
          <option value="1">Female</option>
        </select>
        <br>
-       <input type="date" name="birthdate" id="birthdate" value="">
+       <input type="date" name="birthdate" id="birthdate" value="" defer>
        <br>
-       <textarea name="description" id="" rows="9" cols="40" value="" placeholder="description"></textarea>
+       <textarea name="description" id="description" rows="9" cols="40" value="" placeholder="description" defer></textarea>
        <br>
-       <input type="file" name="avatar" id="avatarID">
+       <input type="file" name="avatar" id="avatarID" defer>
        <br>
-       <input type="hidden" name="token" id="token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjAsImVtYWlsIjoidGVzdEBhZG1pbi5jb20iLCJpYXQiOjE1NTYzNjkzMjksImV4cCI6MTU1NjQ1NTcyOX0.Y9AAHRuY7PwkocMZFsx_qT9TnuBOyWoaYhyjBRiOjXg">
-       <input type="submit" name="Submit" id="SubmitID" value="Submit">
-      </form>
+       <input type="button" name="send" id="send" value="Submit" defer>
     </center>
+   <script>
+       $(document).ready( () => {
+           const token = localStorage.getItem("token");
+           let file;
+           if(token){
+                $.ajaxSetup({
+                    headers: {
+                        'Authorization': "Bearer " + token
+                    },
+                    processData: false,
+                    contentType: false,
+                    cache: false
+                });
+               let userData = false;
+                $.post("http://localhost:3000/users/verify", (data) => {
+                    userData = data;
+                })
+                .done(() => {
+                    if(userData){
+                        console.log(JSON.stringify(userData));
+                        $("#currAva").attr("src", "http://localhost:3000/" + userData.avatar);
+                    }
+                    else{
+                        localStorage.removeItem("token");
+                        window.location.href = "http://localhost:3000/test/login"
+                    }
+                })
+                .fail((data, txtStatus, xhr) => {
+                    console.log(data.status);
+                    localStorage.removeItem("token");
+                    window.location.href = "http://localhost:3000/test/login"
+                });
+           }else{
+               window.location.href = "http://localhost:3000/test/login";
+           }
+           
+           $("input:file").change(() =>{
+             if($("input:file").val().length > 0){
+               file =$("input:file")[0].files[0];
+             }
+           });
+
+           $("#send").click(() => {
+               const penname = $("#penname").val(),
+                     password = $("#password").val(),
+                     gender = $("#gender").val(),
+                     birthdate = $("#birthdate").val(),
+                     description = $("#description").val();
+                
+                fd = new FormData();
+                if (file !== undefined){
+                    fd.append("avatar", file);
+                    //window.location.href = "http://locahost:3000/test/setProfile?error=InvalidInput";
+                }
+                console.log("1");
+                  if(penname !== "" || penname !== undefined) fd.append("penname", penname);
+                  if(password !== "" || password !== undefined) fd.append("password", password);
+                  if(gender !== "" || gender !== undefined) fd.append("gender", gender);
+                  if(birthdate !== "" || birthdate !== undefined) fd.append("birthdate", birthdate);
+                  if(description !== "" || description !== undefined) fd.append("description", description);
+                  $.ajax({
+                    url: "http://localhost:3000/users/setProfile",
+                    type: "PUT",
+                    data: fd,
+                  })
+                  .done(() =>{
+                      window.location.href = "http://localhost:3000/test/setProfile?status=success";
+                  })
+                  .fail((data, txtStatus, xhr) => {
+                      console.log(data.status);
+                      window.location.href = "http://localhost:3000/test/setProfile?status=fail";
+                  });
+
+           })
+       });
+   </script>
   </body>
 </html>

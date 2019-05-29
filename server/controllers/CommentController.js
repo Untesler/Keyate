@@ -52,12 +52,53 @@ const getAllComments = async (req, res) => {
 };
 
 const addNewComment = async (req, res) => {
-  const id        = req.params.id;
-  const user      = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
-  const timestamp = Date.now();
-  let err;
+  const IlRank         = require("../assets/srcs/IlRank");
+  const id           = req.params.id;
+  const illust_model = require("../models/IllustrationModel");
+  const user_model = require("../models/UserModel");
+  const user         = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
+  const timestamp    = Date.now();
+  const IlRankObj = new IlRank();
+  let err, illustData, illustratorData, viewer, popularity;
+  if (req.body.comment === undefined || req.body.comment === null) return res.sendStatus(406);
   if (user) {
     if (DBC.connect()) {
+      [err, illustData] = await to(
+        illust_model.findOne({ comments_box_id: id }, "uid illustrator popularity release_date")
+      );
+      if (err || illustData === null) {
+        LOG.write(
+          "Database",
+          `failed to query Illustration data from comment box[${id}] because(${err}).`
+        );
+        return res.sendStatus(503);
+      }
+      if(user) viewer = user.uid === illustData.illustrator ? "owner" : "user";
+      else viewer = "guest";
+      popularity = IlRankObj.popularity(viewer, "comment", illustData.release_date.getTime());
+      [err, illustratorData] = await to(
+        user_model.findOne({ uid: illustData.illustrator }, "rank")
+      );
+      if (err || illustratorData === null) {
+        LOG.write(
+          "Database",
+          `failed to query Illustration data from comment box[${id}] because(${err}).`
+        );
+        return res.sendStatus(503);
+      }
+      try {
+        await illust_model.updateOne(
+          { uid: illustData.uid },
+          { popularity: illustData.popularity + popularity }
+        );
+        await user_model.updateOne(
+          { uid: illustData.illustrator },
+          { rank: illustratorData.rank + popularity }
+        );
+      } catch (e) {
+        LOG.write("Database", "Can't update popularity or rank from comment method");
+        return res.sendStatus(503);
+      }
       [err] = await to(
         MODEL.updateOne(
           { id: id },

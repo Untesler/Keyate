@@ -1,0 +1,12 @@
+{
+  "affinity": {
+    "user": 2,
+    "guest": 1,
+    "owner": 0
+  },
+  "weight": {
+    "view": 0.618034,
+    "favorite": 4.236068,
+    "comment": 6.854104
+  }
+}

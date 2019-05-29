@@ -26,6 +26,7 @@ const USERSCHEMA = MONGOOSE.Schema({
   followers  : [ Number ],
   following  : [ Number ],
   favorites  : [ Number ],
+  rank       : {type: Number, required: true, default: 0},
   avatar     : {type: String, required: false, default: 'avatars/default.png'}
 
 }, { collection : 'Users'}

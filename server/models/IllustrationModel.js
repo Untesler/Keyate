@@ -12,7 +12,7 @@ const ILLUSTRATIONSCHEMA = MONGOOSE.Schema({
   category : [ String ],
   release_date : {type: Date, required: true, default: new Date(timestamp)},
   views : {type: Number, required: true, default: 0},
-  populars : {type: Number, required: true, default: 0},
+  popularity : {type: Number, required: true, default: 0},
   deleted : {type: Boolean, required: true, default: false},
   comments_box_id : {type: String, required: true, unique: true}
 

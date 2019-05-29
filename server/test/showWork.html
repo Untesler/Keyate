@@ -24,9 +24,20 @@
        $(document).ready(() => {
            const getURL = "http://localhost:3000/illusts/"
            const getValue = ( (window.location.pathname).split('/') )[3];
+           const token = localStorage.getItem("token");
            let runOnce = true;
            let illustData;
            if (runOnce){
+            if(token){
+                    $.ajaxSetup({
+                        headers: {
+                            'Authorization': "Bearer " + token
+                        },
+                        processData: false,
+                        contentType: false,
+                        cache: false
+                    });
+            }
             $.get(getURL+getValue, (data) => {
                 illustData = data
             }, "json")

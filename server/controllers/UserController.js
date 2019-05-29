@@ -124,7 +124,7 @@ const setProfile = async (req, res) => {
     if (req.body.description !== "" && req.body.description !== undefined)
       updateData.description = req.body.description;
 
-    if (req.files !== undefined) {
+    if (req.files !== undefined && req.files !== null) {
       if (req.files.avatar.truncated === false) {
         if (req.files.avatar.size > 0) {
           let fileData = req.files.avatar;
@@ -214,24 +214,6 @@ const setProfile = async (req, res) => {
   }
 };
 
-const getDecode = (req, res) => {
-  const decoded = JWT.verify(req.body.token, PRIVATE_KEY);
-  res.send(decoded.email);
-};
-
-const findUserUid = async (req, res) => {
-  let err, old_avatar;
-
-  DBC.connect();
-  [err, old_avatar] = await to(MODEL.findOne({ uid: "1" }, "avatar"));
-  if (err) {
-    res.json({ error: err });
-  } else {
-    if (old_avatar === null) return res.json({ uid: "not found" });
-    res.json({ uid: old_avatar });
-  }
-};
-
 const getFavorites = async (req, res) => {
   let err, favs;
   const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
@@ -305,9 +287,7 @@ module.exports = {
   getData,
   register,
   signIn,
-  getDecode,
   setProfile,
-  findUserUid,
   getFavorites,
   getFollowers,
   verify

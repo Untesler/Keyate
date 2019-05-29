@@ -18,8 +18,4 @@ ROUTER.get('/followers', USER_CONTROLLER.getFollowers);
 // verify token, return user data as json when has no mistake if not will return false
 ROUTER.post('/verify', USER_CONTROLLER.verify);
 
-//test route
-ROUTER.get('/findUserUid', USER_CONTROLLER.findUserUid);
-ROUTER.post('/decode', USER_CONTROLLER.getDecode);
-
 module.exports = ROUTER;

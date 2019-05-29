@@ -13,6 +13,7 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = PATH.join(__dirname, "config/google
 // Routes import
 const USERS    = require("./routes/users");
 const ILLUSTS  = require('./routes/illust');
+const SEARCH  = require('./routes/search');
 const COMMENTS = require("./routes/comments");
 const TEST     = require("./routes/test");
 
@@ -37,6 +38,7 @@ SERVER.use(
 SERVER.use("/users", USERS);
 SERVER.use("/illusts", ILLUSTS);
 SERVER.use("/comments", COMMENTS);
+SERVER.use("/search", SEARCH);
 SERVER.use(
   "/avatars",
   EXPRESS.static(__dirname + "/assets/imgs/upload/avatars")
@@ -47,16 +49,12 @@ SERVER.use(
 );
 
 // Redundant path, used for unit test only
-SERVER.use("/test", TEST);
+//SERVER.use("/test", TEST);
 
 //if have no any route to handle this req or req.url are index or default
 SERVER.get("*", (req, res) => {
   res.setHeader("Content-Type", "text/html");
-  if (req.url === "/" || req.url === "/index" || req.url === "/index/") {
-    res.sendFile(__dirname + "/test/avatar_upload.html");
-  }else {
-    res.sendStatus(404);
-  }
+  res.sendStatus(404);
 });
 
 SERVER.listen(PORT, () => console.log(`Server started on port : ${PORT}`));
