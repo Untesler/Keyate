@@ -68,7 +68,7 @@ const fullSearch = async (req, res) => {
         searchResult[i].views              = illusts[i].views;
         searchResult[i].release_date       = illusts[i].release_date;
       }
-      DBC.disconnect();
+      //DBC.disconnect();
     } else {
       // search from penname
       if (orderBy === 0) {
@@ -135,7 +135,7 @@ const fullSearch = async (req, res) => {
         searchResult[i].release_date = illusts[i].release_date;
       }
     }
-    DBC.disconnect();
+    //DBC.disconnect();
     if (categories !== "*") {
       //filter according to given categorires list
       for (let i in searchResult) {
@@ -206,7 +206,7 @@ const quickSearch = async (req, res) => {
       searchResult[i].popularity         = results[i].popularity;
       searchResult[i].comments_box_id    = results[i].comments_box_id;
     }
-    DBC.disconnect();
+    //DBC.disconnect();
     return res.json(searchResult);
   } else {
     return res.sendStatus(503);
@@ -230,8 +230,8 @@ const rankSearch = async (req, res) => {
         })
       );
     }
-    DBC.disconnect();
-    if (err) return res.sendStatus(503);
+    //DBC.disconnect();
+    if (err) {console.log(err); return res.sendStatus(503);}
     return res.json(results);
   } else return res.sendStatus(503);
 };
@@ -271,7 +271,7 @@ const popularSearch = async (req, res) => {
       searchResult[i].popularity         = results[i].popularity;
       searchResult[i].comments_box_id    = results[i].comments_box_id;
     }
-    DBC.disconnect();
+    //DBC.disconnect();
     return res.json(searchResult);
   } else {
     return res.sendStatus(503);
@@ -307,7 +307,7 @@ const userIllusts = async (req, res) => {
       searchResult[i].popularity         = results[i].popularity;
       searchResult[i].comments_box_id    = results[i].comments_box_id;
     }
-    DBC.disconnect();
+    //DBC.disconnect();
     return res.json(searchResult);
   } else {
     return res.sendStatus(503);
@@ -340,7 +340,7 @@ const userFollowers = async (req, res) => {
         i++;
       }
     }
-    DBC.disconnect();
+    //DBC.disconnect();
     return res.json(searchResult);
   } else {
     return res.sendStatus(503);
@@ -373,7 +373,7 @@ const userFollowing = async (req, res) => {
         i++;
       }
     }
-    DBC.disconnect();
+    //DBC.disconnect();
     return res.json(searchResult);
   } else {
     return res.sendStatus(503);
@@ -415,7 +415,7 @@ const listBookmarks = async (req, res) => {
         bookmarks[i].illustratorPenname = illustrator.penname;
         i++;
       }
-      DBC.disconnect();
+      //DBC.disconnect();
       return res.json(bookmarks);
     } else {
       return res.sendStatus(503);

@@ -96,7 +96,7 @@ const signIn = async (req, res) => {
         const token = JWT.sign(payload, PRIVATE_KEY, {
           expiresIn: "24h"
         });
-        res.send(token);
+        res.json({token: token, status: "accept"});
       } else res.json({ status: "Password mismatch." });
     } else {
       res.json({ status: "User does not exist" });
@@ -280,7 +280,18 @@ const verify = async (req, res) =>{
     res.json(userData);
   }
   else
-    res.send(false);
+    res.json({status: false});
+}
+
+const existance = async (req, res) =>{
+  const uid = req.params.uid;
+  let err, userData;
+  if(DBC.connect()){
+    [err, userData] = await to(MODEL.findOne({ uid: uid }, "penname gender birthdate description avatar"));
+    res.json(userData);
+  }
+  else
+    res.json({status: false});
 }
 
 module.exports = {
@@ -290,5 +301,6 @@ module.exports = {
   setProfile,
   getFavorites,
   getFollowers,
-  verify
+  verify,
+  existance
 };

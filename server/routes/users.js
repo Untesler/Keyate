@@ -17,5 +17,7 @@ ROUTER.get('/favorites', USER_CONTROLLER.getFavorites);
 ROUTER.get('/followers', USER_CONTROLLER.getFollowers);
 // verify token, return user data as json when has no mistake if not will return false
 ROUTER.post('/verify', USER_CONTROLLER.verify);
+// check user existance
+ROUTER.get('/existance/:uid', USER_CONTROLLER.existance);
 
 module.exports = ROUTER;

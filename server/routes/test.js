@@ -51,4 +51,8 @@ ROUTER.get('/classify/:id', async (req, res) => {
   const [category]= await auto.categorize(`${imgPath}`);
   return res.send(category);
 })
+
+ROUTER.get('/status', async (req, res) => {
+  return res.sendStatus(503);
+})
 module.exports = ROUTER;

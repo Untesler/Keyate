@@ -245,16 +245,35 @@ const deleteWork = async (req, res) => {
 
 const getWork = async (req, res) => {
   /* return the collected data from database as a response */
-  let err, workData;
+  let err, workData, illustratorData;
+  let result = {};
   if (DBC.connect()) {
-    [err, workData] = await to(MODEL.findOne({ uid: req.params.illustID }));
-    DBC.disconnect();
+    [err, workData] = await to(MODEL.findOne({ uid: req.params.illustID, deleted: false}));
     if (err) {
       LOG.write("Database", `find failed because (${err}).`);
       res.sendStatus(503);
-    } else {
-      res.json(workData);
     }
+    [err, illustratorData] = await to(USER_MODEL.findOne({ uid: workData.illustrator }));
+    if (err) {
+      LOG.write("Database", `find failed because (${err}).`);
+      res.sendStatus(503);
+    }
+    DBC.disconnect();
+    result.description = workData.description;
+    result.tag = workData.tag;
+    result.category = workData.category;
+    result.release_date = workData.release_date;
+    result.views = workData.views;
+    result.popularity = workData.popularity;
+    result.name = workData.name;
+    result.path = workData.path;
+    result.uid = workData.uid;
+    result.comments_box_id = workData.comments_box_id;
+    result.illustratorId =workData.illustrator;
+    result.illustratorPenname = illustratorData.penname;
+    result.illustratorAvatar = illustratorData.avatar;
+    result.illustratorRank = illustratorData.rank;
+    res.json(result);
   } else {
     return res.sendStatus(503);
   }

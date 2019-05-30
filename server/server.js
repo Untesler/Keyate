@@ -49,12 +49,12 @@ SERVER.use(
 );
 
 // Redundant path, used for unit test only
-//SERVER.use("/test", TEST);
+SERVER.use("/test", TEST);
 
 //if have no any route to handle this req or req.url are index or default
 SERVER.get("*", (req, res) => {
   res.setHeader("Content-Type", "text/html");
-  res.sendStatus(404);
+  res.sendStatus(403);
 });
 
 SERVER.listen(PORT, () => console.log(`Server started on port : ${PORT}`));
