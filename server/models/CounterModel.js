@@ -10,3 +10,11 @@ const COUNTERSCHEMA = MONGOOSE.Schema({
 );
 
 module.exports = MONGOOSE.model('Counter', COUNTERSCHEMA);
+
+/*
+*
+* Please insert the documents manually, used for do auto increment in mongo
+* First: _id: Users, val: 0
+* Second: _id: Illusts, val: 0
+*
+*/

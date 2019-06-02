@@ -72,10 +72,12 @@ const submitWork = async (req, res) => {
           // move the temp file of uploaded file(move and convert to image file) to the path where the file are stored.
           [err] = await to(fileData.mv(newpath));
           if (err) {
+            console.log(err)
             LOG.write("Error", "Failed to create work image (" + err + ").");
             // if the error occur while moving, then delete the temp file of file.
             FS.unlink(req.files.work.tempFilePath, err => {
               if (err)
+              console.log(err)
                 LOG.write("Error", "Failed to delete tmp file (" + err + ").");
             });
             return res.sendStatus(500);
@@ -185,55 +187,51 @@ const deleteWork = async (req, res) => {
   const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
 
   if (user) {
-    if (DBC.connect()) {
-      let path;
-      // to delete any work things we need to delete any data that involved to it
-      [err, path] = await to(
-        MODEL.findOne({ uid: req.params.illustID }, "path")
+    let path;
+    // to delete any work things we need to delete any data that involved to it
+    [err, path] = await to(
+      MODEL.findOne({ uid: req.params.illustID }, "path")
+    );
+    if (err) {
+      LOG.write(
+        "Database",
+        `Failed to findOne illust uid ${req.params.illustID} because (${err})`
       );
-      if (err) {
-        LOG.write(
-          "Database",
-          `Failed to findOne illust uid ${req.params.illustID} because (${err})`
-        );
-        res.sendStatus(503);
-      }
-      if (path === "" || path === undefined) {
-        return res.sendStatus(200);
-      } else {
-        // determine the path of the image to use in deletion
-        path = PATH.join(__dirname, "../") + `/assets/imgs/${path.path}`;
-      }
-      // delete the file as a request
-      [err] = await to(
-        MODEL.deleteOne({ uid: req.params.illustID, illustrator: user.uid })
-      );
-      if (err) {
-        LOG.write("Database", `deleteOne failed because (${err}).`);
-        return res.sendStatus(503);
-      } else {
-        LOG.write(
-          "Database",
-          `deleteOne work uid : ${req.params.illustID} complete.`
-        );
-        // delete the illustration of the deleted work.
-        await FS.unlink(path, e => {
-          if (e) LOG.write("Error", `Failed to delete illust file (${e}).`);
-        });
-      }
-      // delete the comment box of this illustration
-      [err] = await to(
-        COMMENT_MODEL.deleteOne({ id: `p${req.params.illustID}` })
-      );
-      DBC.disconnect();
-      if (err) {
-        LOG.write("Database", `deleteOne failed because (${err}).`);
-        return res.sendStatus(503);
-      }
+      res.sendStatus(503);
+    }
+    if (path === "" || path === undefined) {
       return res.sendStatus(200);
     } else {
+      // determine the path of the image to use in deletion
+      path = PATH.join(__dirname, "../") + `/assets/imgs/${path.path}`;
+    }
+    // delete the file as a request
+    [err] = await to(
+      MODEL.deleteOne({ uid: req.params.illustID, illustrator: user.uid })
+    );
+    if (err) {
+      LOG.write("Database", `deleteOne failed because (${err}).`);
+      return res.sendStatus(503);
+    } else {
+      LOG.write(
+        "Database",
+        `deleteOne work uid : ${req.params.illustID} complete.`
+      );
+      // delete the illustration of the deleted work.
+      await FS.unlink(path, e => {
+        if (e) LOG.write("Error", `Failed to delete illust file (${e}).`);
+      });
+    }
+    // delete the comment box of this illustration
+     [err] = await to(
+      COMMENT_MODEL.deleteOne({ id: `p${req.params.illustID}` })
+    );
+    
+    if (err) {
+      LOG.write("Database", `deleteOne failed because (${err}).`);
       return res.sendStatus(503);
     }
+      return res.sendStatus(200);
   } else {
     LOG.write(
       "Authenicate",
@@ -254,11 +252,11 @@ const getWork = async (req, res) => {
       res.sendStatus(503);
     }
     [err, illustratorData] = await to(USER_MODEL.findOne({ uid: workData.illustrator }));
+    if(illustratorData === null) return res.sendStatus(204);
     if (err) {
       LOG.write("Database", `find failed because (${err}).`);
       res.sendStatus(503);
     }
-    DBC.disconnect();
     result.description = workData.description;
     result.tag = workData.tag;
     result.category = workData.category;
@@ -304,7 +302,6 @@ const addView = async (req, res) => {
         { uid: illustData.illustrator },
         { rank: illustratorData.rank + popularity }
       );
-      DBC.disconnect()
     } catch (e) {
       LOG.write("Database", `findOne/updateOne failed because (${e}).`);
       return res.sendStatus(503);
@@ -327,35 +324,32 @@ const addPopular = async (req, res) => {
   let popularity;
   const IlRankObj = new IlRank();
   if (user) {
-    if (DBC.connect()) {
-      try {
-        illustData = await MODEL.findOne({ uid: req.params.illustID }, "popularity illustrator release_date");
-        if(illustData === null) return res.sendStatus(404);
-        if(user) viewer = user.uid === illustData.illustrator ? "owner" : "user";
-        else viewer = "guest";
-        popularity = IlRankObj.popularity(viewer, "favorite", illustData.release_date.getTime());
-        await MODEL.updateOne(
-          { uid: req.params.illustID },
-          { popularity: illustData.popularity + popularity }
-        );
-        illustratorData = await USER_MODEL.findOne({ uid: illustData.illustrator }, "rank");
-        await USER_MODEL.updateOne(
-          { uid: illustData.illustrator },
-          { rank: illustratorData.rank + popularity }
-        );
-        await USER_MODEL.updateOne(
-          { uid: user.uid },
-          { $push: { favorites: req.params.illustID } }
-        );
-      } catch (e) {
-        LOG.write("Database", `findOne/updateOne failed because (${e}).`);
-        DBC.disconnect();
-        return res.sendStatus(503);
-      }
-      DBC.disconnect();
-      LOG.write("Database", `User[${user.uid}] - add favorite complete.`);
-      return res.sendStatus(201);
+    try {
+      illustData = await MODEL.findOne({ uid: req.params.illustID }, "popularity illustrator release_date");
+      if(illustData === null) return res.sendStatus(404);
+      if(user) viewer = user.uid === illustData.illustrator ? "owner" : "user";
+      else viewer = "guest";
+      popularity = IlRankObj.popularity(viewer, "favorite", illustData.release_date.getTime());
+      await MODEL.updateOne(
+        { uid: req.params.illustID },
+        { popularity: illustData.popularity + popularity }
+      );
+      illustratorData = await USER_MODEL.findOne({ uid: illustData.illustrator }, "rank");
+      await USER_MODEL.updateOne(
+        { uid: illustData.illustrator },
+        { rank: illustratorData.rank + popularity }
+      );
+      await USER_MODEL.updateOne(
+        { uid: user.uid },
+        { $push: { favorites: req.params.illustID } }
+      );
+    } catch (e) {
+      LOG.write("Database", `findOne/updateOne failed because (${e}).`);
+      return res.sendStatus(503);
     }
+    
+    LOG.write("Database", `User[${user.uid}] - add favorite complete.`);
+    return res.sendStatus(201);
   } else {
     LOG.write(
       "Authenicate",
@@ -374,7 +368,7 @@ const listWork = async (req, res) => {
       [err, workList] = await to(
         MODEL.find({ illustrator: user.uid }, "uid") // find where illustrator, and only selecting uid field
       );
-      DBC.disconnect();
+      
       if (err) {
         LOG.write("Database", `find failed because (${err}).`);
         res.sendStatus(503);
@@ -406,7 +400,7 @@ const listAllWork = async (req, res) => {
   let err, workList;
   if (DBC.connect()) {
     [err, workList] = await to(MODEL.find({}, "uid"));
-    DBC.disconnect();
+    
     if (err) {
       LOG.write("Database", `find failed beacause (${err}).`);
       res.sendStatus(503);

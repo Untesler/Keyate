@@ -82,7 +82,7 @@ const fullSearch = async (req, res) => {
             USER_MODEL.findOne({ penname: keyword }, "uid")
           );
           if (err) return res.sendStatus(503);
-          if (illustrator === null) return res.sendStatus(204);
+          if (illustrator === null) return res.json({});
           [err, illusts] = await to(
             ILLUST_MODEL.find({
               illustrator: illustrator.uid,
@@ -391,35 +391,32 @@ const listBookmarks = async (req, res) => {
   let bookmarks = {};
 
   if (user) {
-    if (DBC.connect()) {
-      [err, result] = await to(
-        USER_MODEL.findOne({ uid: user.uid }, "favorites")
+    [err, result] = await to(
+      USER_MODEL.findOne({ uid: user.uid }, "favorites")
+    );
+    if (err) return res.sendStatus(503);
+    for (let wID of result.favorites) {
+      [err, illusts] = await to(
+        ILLUST_MODEL.findOne(
+          { uid: wID, deleted: false },
+          "uid name path illustrator"
+        )
       );
       if (err) return res.sendStatus(503);
-      for (let wID of result.favorites) {
-        [err, illusts] = await to(
-          ILLUST_MODEL.findOne(
-            { uid: wID, deleted: false },
-            "uid name illustrator"
-          )
-        );
-        if (err) return res.sendStatus(503);
-        [err, illustrator] = await to(
-          USER_MODEL.findOne({ uid: illusts.illustrator }, "penname")
-        );
-        if (err) return res.sendStatus(503);
-        bookmarks[i]                    = {};
-        bookmarks[i].uid                = illusts.uid;
-        bookmarks[i].name               = illusts.name;
-        bookmarks[i].illustratorId      = illusts.illustrator;
-        bookmarks[i].illustratorPenname = illustrator.penname;
-        i++;
-      }
-      //DBC.disconnect();
-      return res.json(bookmarks);
-    } else {
-      return res.sendStatus(503);
+      if(illusts === null) continue;
+      [err, illustrator] = await to(
+        USER_MODEL.findOne({ uid: illusts.illustrator }, "penname")
+      );
+      if (err) return res.sendStatus(503);
+      bookmarks[i]                    = {};
+      bookmarks[i].uid                = illusts.uid;
+      bookmarks[i].name               = illusts.name;
+      bookmarks[i].path               = illusts.path;
+      bookmarks[i].illustratorId      = illusts.illustrator;
+      bookmarks[i].illustratorPenname = illustrator.penname;
+      i++;
     }
+    return res.json(bookmarks);
   } else {
     return res.sendStatus(401);
   }

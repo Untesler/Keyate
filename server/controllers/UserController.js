@@ -16,7 +16,8 @@ const PRIVATE_KEY    = FS.readFileSync(
 );
 
 const getData = async (req, res) => {
-  if (DBC.connect()) {
+  const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
+  if (user && user.uid === 0) {
     res.send(await MODEL.find({}));
   } else {
     res.send("Can't make a connection.");
@@ -192,18 +193,14 @@ const setProfile = async (req, res) => {
       }
     }
 
-    if (DBC.connect()) {
-      [err] = await to(MODEL.updateOne({ uid: user.uid }, updateData));
-      if (err) {
-        LOG.write("Database", "updateOne failed beacause (" + err + ").");
-        return res.sendStatus(503);
-      } else {
-        LOG.write("Database", "Uid[" + user.uid + "] Update profile success.");
-      }
-      return res.sendStatus(201);
-    } else {
+    [err] = await to(MODEL.updateOne({ uid: user.uid }, updateData));
+    if (err) {
+      LOG.write("Database", "updateOne failed beacause (" + err + ").");
       return res.sendStatus(503);
+    } else {
+      LOG.write("Database", "Uid[" + user.uid + "] Update profile success.");
     }
+    return res.sendStatus(201);
   } else {
     if (req.files !== undefined) {
       FS.unlink(req.files.avatar.tempFilePath, err => {
@@ -219,20 +216,16 @@ const getFavorites = async (req, res) => {
   const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
 
   if (user) {
-    if (DBC.connect()) {
-      [err, favs] = await to(MODEL.findOne({ uid: user.uid }, "favorites"));
-      if (err) {
-        LOG.write("Database", "findOne failed because(" + err + ")");
-        return res.sendStatus(503);
-      } else {
-        DBC.disconnect();
-        return res.json({
-          Total    : favs.favorites.length,
-          favorites: favs.favorites
-        });
-      }
-    } else {
+    [err, favs] = await to(MODEL.findOne({ uid: user.uid }, "favorites"));
+    if (err) {
+      LOG.write("Database", "findOne failed because(" + err + ")");
       return res.sendStatus(503);
+    } else {
+      DBC.disconnect();
+      return res.json({
+        Total    : favs.favorites.length,
+        favorites: favs.favorites
+      });
     }
   } else {
     LOG.write(
@@ -248,20 +241,16 @@ const getFollowers = async (req, res) => {
   const user = req.token !== null ? AUTHENICATION.authenicate(req.token) : null;
 
   if (user) {
-    if (DBC.connect()) {
-      [err, fol] = await to(MODEL.findOne({ uid: user.uid }, "followers"));
-      if (err) {
-        LOG.write("Database", "findOne failed because(" + err + ")");
-        return res.sendStatus(503);
-      } else {
-        DBC.disconnect();
-        return res.json({
-          Total    : fol.followers.length,
-          followers: fol.followers
-        });
-      }
-    } else {
+    [err, fol] = await to(MODEL.findOne({ uid: user.uid }, "followers"));
+    if (err) {
+      LOG.write("Database", "findOne failed because(" + err + ")");
       return res.sendStatus(503);
+    } else {
+      DBC.disconnect();
+      return res.json({
+        Total    : fol.followers.length,
+        followers: fol.followers
+      });
     }
   } else {
     LOG.write(

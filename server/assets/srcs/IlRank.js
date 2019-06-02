@@ -10,8 +10,7 @@
    *         equal to [(ue * we)^(ln (currentTimestamp / ReleaseTimestamp))]
    *   In summerized:
    *                   Rank(User) = Sum( Ue*We*[(ue * we)^(ln (currentTimestamp / ReleaseTimestamp))] )
-   *   if user have follower; 
-   *                   Rank(User) = |followers| * Sum( Ue*We*[(ue * we)^(ln (currentTimestamp / ReleaseTimestamp))] )
+   *
    * **************************************************************************************************************************************** */
 
 class IlRank {

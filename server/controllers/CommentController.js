@@ -1,6 +1,7 @@
 /* eslint no-unused-vars: 0 */
 const DBC           = require("../controllers/MongooseConnect");
 const MODEL         = require("../models/CommentModel");
+const USER_MODEL    = require("../models/UserModel");
 const LOG           = require("../assets/srcs/Log");
 const AUTHENICATION = require("../controllers/Authenication");
 const to            = require("await-to-js").default;
@@ -8,7 +9,7 @@ const MONGOOSE      = require("mongoose");
 
 const getAllComments = async (req, res) => {
   const id = req.params.id;
-  let err, comments;
+  let err, comments, results = [], user, i = 0;
   /* find every comment in comments that have not been deleted yet,
      and list only commentator uid, helpful point, comment and comment date 
      Read more: https://techbrij.com/mongodb-query-select-filter-child-nested-array */
@@ -28,6 +29,20 @@ const getAllComments = async (req, res) => {
         }
       ])
     );
+
+    for(let comment of comments){
+      [err, user] = await to(USER_MODEL.findOne({ uid: comment.commentator }, "penname avatar"));
+      if(err || user === null) continue;
+      let result                    = {};
+          result._id                = comment._id;
+          result.commentator        = comment.commentator;
+          result.helpful            = comment.helpful;
+          result.comment            = comment.comment;
+          result.date               = comment.date;
+          result.commentatorPenname = user.penname;
+          result.commentatorAvatar  = user.avatar;
+      results.push(result);
+    }
     // [err, comments] = await to(MODEL.findOne({
     //   id: id,
     //   comments: {
@@ -42,10 +57,10 @@ const getAllComments = async (req, res) => {
     //   "comments.date": 1
     // }));
     if (err) {
-      LOG.write("Database", `aggregate(line:16) failed because(${err}).`);
+      LOG.write("Database", `aggregate(line:18) failed because(${err}).`);
       return res.sendStatus(503);
     }
-    return res.json(comments);
+    return res.json(results);
   } else {
     return res.sendStatus(503);
   }
@@ -115,7 +130,7 @@ const addNewComment = async (req, res) => {
           }
         )
       );
-      DBC.disconnect();
+      
       if (err) {
         LOG.write(
           "Database",
@@ -181,7 +196,7 @@ const totalComments = async (req, res) => {
         }
       ])
     );
-    DBC.disconnect();
+    
     if (err) {
       LOG.write(
         "Database",
@@ -197,7 +212,7 @@ const totalComments = async (req, res) => {
 
 const latestComment = async (req, res) => {
   const id = req.params.id;
-  let err, comment;
+  let err, comment, user;
 
   if (DBC.connect()) {
     [err, comment] = await to(
@@ -212,7 +227,7 @@ const latestComment = async (req, res) => {
         }
       ])
     );
-    DBC.disconnect();
+    
     if (err) {
       LOG.write(
         "Database",
@@ -220,12 +235,16 @@ const latestComment = async (req, res) => {
       );
       return res.sendStatus(503);
     }
+    [err, user] = await to(USER_MODEL.findOne({ uid: comment[0].commentator }, "penname avatar"));
+    if(err || user === null) return res.json({});
     return res.json({
-      commentator: comment[0].comments[0].commentator,
-      helpful    : comment[0].comments[0].helpful,
-      comment    : comment[0].comments[0].comment,
-      date       : comment[0].comments[0].date,
-      _id        : comment[0].comments[0]._id
+      commentatorPenname: user.penname,
+      commentatorAvatar : user.avatar,
+      commentator       : comment[0].comments[0].commentator,
+      helpful           : comment[0].comments[0].helpful,
+      comment           : comment[0].comments[0].comment,
+      date              : comment[0].comments[0].date,
+      _id               : comment[0].comments[0]._id,
     });
   } else {
     return res.sendStatus(503);
@@ -249,7 +268,7 @@ const delComment = async (req, res) => {
           }
         }
       );
-      DBC.disconnect();
+      
       return res.sendStatus(200);
     } else {
       return res.sendStatus(503);
@@ -298,7 +317,7 @@ const addHelpful = async (req, res) => {
           if (err) return res.sendStatus(503);
         }
       );
-      DBC.disconnect();
+      
       return res.sendStatus(200);
     } else {
       return res.sendStatus(503);
