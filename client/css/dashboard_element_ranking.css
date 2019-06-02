@@ -1,0 +1,158 @@
+
+a {
+	
+  font-family: Kanit-SemiBold;
+  text-decoration: none;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+	-o-transition: all 0.4s;
+ 	-moz-transition: all 0.4s;
+	color: #000000;
+}
+
+a:hover {
+	font-family: Kanit-Bold;
+  text-decoration: none;
+  color: #f78336;
+}
+
+*{
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  box-sizing:border-box;
+}
+
+#follower {
+	font-family: Kanit-Bold;
+}
+
+.listRanking {
+	box-shadow: 2px 2px 4px 0px rgba(50, 50, 50, .5);
+}
+
+.listArticleThumbnail {
+  overflow: hidden;
+}
+
+body {
+  font-family: Kanit-SemiBold;
+  font-size: 19px;
+  width: 100%;
+}
+.container {
+  height: 100%;
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: flex-start;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.item {
+  flex: 0 0 auto;
+  margin: 5px;
+}
+
+.header {
+  font-size: 5vw;
+  font-family: Kanit-Medium;
+  position: relative;
+}
+
+.dashboard_ranking {
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: baseline;
+  align-content: center;
+}
+
+.item {
+  flex: 0 0 auto;
+  margin: 5px;
+}
+
+#dashboard_element_ranking {
+  width: 95%;
+  margin: 2px;
+  margin-bottom: 20px;
+  border: 2px;
+  box-sizing: border-box;
+}
+
+#penName {
+font-family: Kanit-Bold;
+}
+/*button:hover {
+	background-color: #000000;
+	color: #eeeeee;
+	font-family: Kanit-SemiBold;
+}
+
+@media (max-width: 768px) {
+  .btnResponsive {
+  	font-family: Kanit-SemiBold;
+	border-radius: 15px;
+	background-color: #f78336;
+	text-align: center;
+	border: 0px;
+	border-width: 20px;
+	transition: all 0.4s;
+  	-webkit-transition: all 0.4s;
+	-o-transition: all 0.4s;
+ 	-moz-transition: all 0.4s;
+    padding:2px 4px;
+    font-size:80%;
+    line-height: 1;
+  }
+}*/
+
+.btn-responsive {
+	font-family: Kanit-SemiBold;
+	cursor: pointer;
+}
+
+/*
+
+@media (max-width: 768px) {
+  .btn-responsive {
+    padding:3px 4px 3px 4px;
+    font-size:90%;
+    line-height: 1;
+    border-radius:5px;
+   }
+   .showDetailWriter {
+  	font-size: 100%;
+	}
+
+}
+@media (min-width: 300px) {
+  .btn-responsive {
+    padding:4px 6px 4px 6px;
+    font-size:90%;
+    line-height: 1.2;
+    margin-bottom : 7px;
+  }
+  .showDetailWriter {
+  	font-size: 90%;
+  }
+/*  .viewProfile {
+  	padding-bottom: 7px;
+  }*/
+
+@media (min-width: 375px) {
+  .btn-responsive {
+    padding:4px 6px 4px 6px;
+    font-size:100%;
+    line-height: 1.2;
+  }
+   .viewProfile {
+  	padding-top: ;
+  }
+  }*/

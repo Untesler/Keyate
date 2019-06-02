@@ -1,5 +1,4 @@
 node_modules
-client
 server/config/config_db.js
 server/config/google_app_credential.json
 server/assets/imgs/upload/avatars/*

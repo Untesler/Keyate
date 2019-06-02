@@ -1,0 +1,124 @@
+
+*{
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
+}
+
+a {
+  text-decoration: none;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.listArticleDescription {
+  font-family: Kanit-Regular;
+  color: #000000;
+}
+
+.listArticleName {
+  font-family: Kanit-Bold;
+  font-size: 18px;
+  color: #000000;
+  margin-top: 1em;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+}
+
+.listAuthorName a {
+  font-family: Kanit-SemiBold;
+  font-size: 14px;
+  color: #000000; 
+}
+
+.listAuthorName a:hover,.listArticleName:hover {
+  color: #f78336; 
+}
+
+.listArticleItem {
+  box-shadow: 2px 2px 4px 0px rgba(50, 50, 50, .5);
+}
+
+.listArticleThumbnail {
+  width: 100%;
+  margin-bottom, padding-bottom: 0px;
+}
+
+body {
+  font-family: Kanit-SemiBold;
+  font-size: 19px;
+  width: 100%;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: flex-start;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.item {
+  flex: 0 0 auto;
+  margin: 5px;
+}
+
+.header {
+  font-size: 5vw;
+  font-family: Kanit-Medium;
+  position: relative;
+}
+
+.dashboard_popular {
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: baseline;
+  align-content: center;
+}
+
+.item {
+  flex: 0 0 auto;
+  margin: 5px;
+}
+
+#dashboard_element_popular {
+  width: 95%;
+  margin: 2px;
+  margin-bottom: 20px;
+  border: 2px;
+  box-sizing: border-box;
+    }
+
+@media (min-width: 320px) {
+    .myListArticleInfo {
+      margin-top: 0px;
+      margin-right: 2vw;
+    }     
+    hr {
+      margin-top: 0.2em;
+      margin-bottom: : 0px;
+    }       
+}
+
+@media (max-width: 768px) {
+    .myListArticleInfo {
+      margin-right: 2vw;
+    }   
+}
+
